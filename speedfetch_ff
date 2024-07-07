@@ -1,18 +1,37 @@
 #!/bin/bash
 
+# Initialize variables with default values
+OS=""
+HOSTNAME=""
+KERNEL=""
+UPTIME=""
+PACKAGES=""
+SHELL=""
+RESOLUTION=""
+DE=""
+WM=""
+THEME=""
+ICONS=""
+TERMINAL=""
+CPU=""
+GPU=""
+MEMORY=""
+DISK=""
+NETWORK=""
+
 # Function to gather system information
 get_system_info() {
     OS=$(uname -o)
     HOSTNAME=$(hostname)
     KERNEL=$(uname -r)
     UPTIME=$(uptime -p | sed 's/up //')
-    PACKAGES=$(pacman -Q | wc -l)
+    PACKAGES=$(pacman -Q 2>/dev/null | wc -l)  # Check if pacman is available
     SHELL="$SHELL"
     RESOLUTION=$(xdpyinfo 2>/dev/null | grep dimensions | awk '{print $2}')
     DE=$(echo "$XDG_CURRENT_DESKTOP")
     WM=$(echo "$XDG_SESSION_TYPE")
-    THEME=$(gsettings get org.gnome.desktop.interface gtk-theme)
-    ICONS=$(gsettings get org.gnome.desktop.interface icon-theme)
+    THEME=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null)
+    ICONS=$(gsettings get org.gnome.desktop.interface icon-theme 2>/dev/null)
     TERMINAL="$TERM"
     CPU=$(lscpu | grep 'Model name' | awk -F ':' '{print $2}' | sed 's/^[ \t]*//')
     GPU=$(lspci | grep VGA | cut -d ':' -f 3 | sed 's/^[ \t]*//')
@@ -34,29 +53,38 @@ display_logo() {
 
 # Function to display the fetched information
 display_info() {
-    display_logo
-    echo "                   -\`                    $USER@$HOSTNAME"
-    echo "                  .o+\`                   -----------"
-    echo "                 \`ooo/                   OS: $OS"
-    echo "                \`+oooo:                  Host: $HOSTNAME"
-    echo "               \`+oooooo:                 Kernel: $KERNEL"
-    echo "               -+oooooo+:                Uptime: $UPTIME"
-    echo "             \`/:-:++oooo+:               Packages: $PACKAGES (pacman)"
-    echo "            \`/++++/+++++++:              Shell: $SHELL"
-    echo "           \`/+++++++++++++++:             Resolution: $RESOLUTION"
-    echo "          \`/+++ooooooooooooo/\`           DE: $DE"
-    echo "         ./ooosssso++osssssso+\`          WM: $WM"
-    echo "        .oossssso-\`\`\`/ossssss+\`         Theme: $THEME"
-    echo "       -osssssso.      :ssssssso.        Icons: $ICONS"
-    echo "      :osssssss/        osssso+++.       Terminal: $TERMINAL"
-    echo "     /ossssssss/        +ssssooo/-       CPU: $CPU"
-    echo "   \`/ossssso+/:-        -:/+osssso+-     GPU: $GPU"
-    echo "  \`+sso+:-\`                 \`.-/+oso:    Memory: $MEMORY"
-    echo " \`++:.                           \`-/+/"
-    echo " .\`                                 \`/"
-    echo "                                         Disk: $DISK"
-    echo "                                         Network: $NETWORK"
-    echo ""
+    # Ensure variables are set
+    if [ -n "$OS" ] && [ -n "$HOSTNAME" ] && [ -n "$KERNEL" ] && [ -n "$UPTIME" ] && \
+       [ -n "$PACKAGES" ] && [ -n "$SHELL" ] && [ -n "$RESOLUTION" ] && \
+       [ -n "$DE" ] && [ -n "$WM" ] && [ -n "$THEME" ] && [ -n "$ICONS" ] && \
+       [ -n "$TERMINAL" ] && [ -n "$CPU" ] && [ -n "$GPU" ] && [ -n "$MEMORY" ] && \
+       [ -n "$DISK" ] && [ -n "$NETWORK" ]; then
+        display_logo
+        echo "                   -\`                    $USER@$HOSTNAME"
+        echo "                  .o+\`                   -----------"
+        echo "                 \`ooo/                   OS: $OS"
+        echo "                \`+oooo:                  Host: $HOSTNAME"
+        echo "               \`+oooooo:                 Kernel: $KERNEL"
+        echo "               -+oooooo+:                Uptime: $UPTIME"
+        echo "             \`/:-:++oooo+:               Packages: $PACKAGES (pacman)"
+        echo "            \`/++++/+++++++:              Shell: $SHELL"
+        echo "           \`/+++++++++++++++:             Resolution: $RESOLUTION"
+        echo "          \`/+++ooooooooooooo/\`           DE: $DE"
+        echo "         ./ooosssso++osssssso+\`          WM: $WM"
+        echo "        .oossssso-\`\`\`/ossssss+\`         Theme: $THEME"
+        echo "       -osssssso.      :ssssssso.        Icons: $ICONS"
+        echo "      :osssssss/        osssso+++.       Terminal: $TERMINAL"
+        echo "     /ossssssss/        +ssssooo/-       CPU: $CPU"
+        echo "   \`/ossssso+/:-        -:/+osssso+-     GPU: $GPU"
+        echo "  \`+sso+:-\`                 \`.-/+oso:    Memory: $MEMORY"
+        echo " \`++:.                           \`-/+/"
+        echo " .\`                                 \`/"
+        echo "                                         Disk: $DISK"
+        echo "                                         Network: $NETWORK"
+        echo ""
+    else
+        echo "Error: Failed to fetch system information."
+    fi
 }
 
 # Main execution
