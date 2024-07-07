@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# Function to gather system information
+get_system_info() {
+    OS=$(uname -o)
+    HOSTNAME=$(hostname)
+    KERNEL=$(uname -r)
+    UPTIME=$(uptime -p | sed 's/up //')
+    PACKAGES=$(pacman -Q | wc -l)
+    SHELL=$SHELL
+    RESOLUTION=$(xdpyinfo 2>/dev/null | grep dimensions | awk '{print $2}')
+    DE=$(echo "$XDG_CURRENT_DESKTOP")
+    WM=$(echo "$XDG_SESSION_TYPE")
+    THEME=$(gsettings get org.gnome.desktop.interface gtk-theme)
+    ICONS=$(gsettings get org.gnome.desktop.interface icon-theme)
+    TERMINAL=$(echo "$TERM")
+    CPU=$(lscpu | grep 'Model name' | awk -F ':' '{print $2}' | sed 's/^[ \t]*//')
+    GPU=$(lspci | grep VGA | cut -d ':' -f 3 | sed 's/^[ \t]*//')
+    MEMORY=$(free -m | awk 'NR==2{print $3"MiB / "$2"MiB"}')
+    DISK=$(df -h / | awk 'NR==2{print $3" used / "$2" total"}')
+    NETWORK=$(ip route get 1 | awk '{print $7; exit}')
+}
+
+# Function to display the Linux penguin (Tux) logo
+display_logo() {
+    echo "                   .--."
+    echo "                  |o_o |"
+    echo "                  |:_/ |"
+    echo "                 //   \ \ "
+    echo "                (|     | )"
+    echo "               /'\_   _/`\ "
+    echo "               \___)=(___/"
+}
+
+# Function to display the fetched information
+display_info() {
+    display_logo
+    echo "                   -\`                    $USER@$HOSTNAME"
+    echo "                  .o+\`                   -----------"
+    echo "                 \`ooo/                   OS: $OS"
+    echo "                \`+oooo:                  Host: $HOSTNAME"
+    echo "               \`+oooooo:                 Kernel: $KERNEL"
+    echo "               -+oooooo+:                Uptime: $UPTIME"
+    echo "             \`/:-:++oooo+:               Packages: $PACKAGES (pacman)"
+    echo "            \`/++++/+++++++:              Shell: $SHELL"
+    echo "           \`/++++++++++++++:             Resolution: $RESOLUTION"
+    echo "          \`/+++ooooooooooooo/\`           DE: $DE"
+    echo "         ./ooosssso++osssssso+\`          WM: $WM"
+    echo "        .oossssso-\`\`\`\`/ossssss+\`         Theme: $THEME"
+    echo "       -osssssso.      :ssssssso.        Icons: $ICONS"
+    echo "      :osssssss/        osssso+++.       Terminal: $TERMINAL"
+    echo "     /ossssssss/        +ssssooo/-       CPU: $CPU"
+    echo "   \`/ossssso+/:-        -:/+osssso+-     GPU: $GPU"
+    echo "  \`+sso+:-\`                 \`.-/+oso:    Memory: $MEMORY"
+    echo " \`++:.                           \`-/+/"
+    echo " .\`                                 \`/"
+    echo "                                         Disk: $DISK"
+    echo "                                         Network: $NETWORK"
+    echo ""
+}
+
+# Main execution
+get_system_info
+display_info
